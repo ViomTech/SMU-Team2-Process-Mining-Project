@@ -1,0 +1,15 @@
+pm4py
+Flask
+Flask-Cors
+boto3
+psycopg2-binary
+python-dotenv
+SQLAlchemy
+Flask-SQLAlchemy
+Werkzeug
+Flask-migrate
+pytest==8.2.1
+pytest-cov==5.0.0
+PyYAML>=6.0
+pydantic
+huggingface_hub

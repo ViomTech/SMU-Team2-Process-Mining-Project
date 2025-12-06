@@ -1,0 +1,291 @@
+rules:
+- source: DBLogs
+  pattern: (?i)\bINSERT\s+INTO\s+loan_applications\b
+  activity: Application Inserted
+- source: DBLogs
+  pattern: (?i)\bSELECT\b.*\bFROM\s+customers\b
+  activity: Customer Profile Queried
+- source: DBLogs
+  pattern: (?i)\bINSERT\s+INTO\s+kyc_verification\b
+  activity: KYC Verification Initiated
+- source: DBLogs
+  pattern: (?i)\bUPDATE\s+loan_applications\b
+  activity: Loan Application Updated
+- source: DBLogs
+  pattern: (?i)\bUPDATE\s+loan_status\b
+  activity: Loan Status Updated
+- source: DBLogs
+  pattern: (?i)\bUPDATE\s+sanction_letters\b
+  activity: Sanction Letter Updated
+- source: DBLogs
+  pattern: (?i)\bUPDATE\s+credit_scores\b
+  activity: Credit Score Updated
+- source: DBLogs
+  pattern: (?i)\bINSERT\s+INTO\s+property_details\b
+  activity: Property Verification Initiated
+- source: DBLogs
+  pattern: (?i)\bDELETE\s+FROM\s+temp_docs\b
+  activity: Temporary Documents Cleanup
+- source: APIGateway
+  pattern: REQUEST POST /loan-application/submit
+  activity: Application Submitted
+- source: APIGateway
+  pattern: RESPONSE\s+200\s+OK\s+for application ID\s+APP[A-Z0-9]+
+  activity: Application Accepted
+- source: KYCService
+  pattern: \bKYC lookup started\b
+  activity: KYC Lookup Start
+- source: KYCService
+  pattern: \bAadhaar verified\b|\bKYC verified\b
+  activity: Aadhaar/PAN KYC Check
+- source: KYCService
+  pattern: \bPAN validation failed\b|\bPAN.*failed\b|\bKYC.*failed\b
+  activity: KYC Mismatch (PAN)
+- source: PaymentGateway
+  pattern: Payment initiated
+  activity: Processing Fee Payment Initiated
+- source: PaymentGateway
+  pattern: Payment confirmed
+  activity: Processing Fee Payment Confirmed
+- source: UnderwriterConsole
+  pattern: Underwriter .* reviewed application ID
+  activity: Underwriter Review
+- source: UnderwriterConsole
+  pattern: COMMENT .*approved|COMMENT .*reduced amount|COMMENT .*rejected
+  activity: Underwriter Decision Note
+- source: CreditCheck
+  pattern: CIBIL check initiated
+  activity: Credit Check (CIBIL)
+- source: CreditCheck
+  pattern: Credit report fetched
+  activity: Fetch Credit Report
+- source: CreditCheck
+  pattern: Score below threshold
+  activity: Score Below Threshold
+- source: DocVerifier
+  pattern: Document scanned
+  activity: Documents Scanned
+- source: DocVerifier
+  pattern: Verification passed
+  activity: Documents Verified
+- source: DocVerifier
+  pattern: Mismatch found in PAN
+  activity: KYC Mismatch (PAN)
+- source: LoanProcessor
+  pattern: Loan application validated
+  activity: Application Validated
+- source: LoanProcessor
+  pattern: Loan risk analysis complete
+  activity: Risk Analysis & Eligibility
+- source: LoanProcessor
+  pattern: Loan approval sent
+  activity: Approval Sent
+- source: NotificationService
+  pattern: Email sent to applicant
+  activity: Email Sent
+- source: NotificationService
+  pattern: SMS alert triggered
+  activity: SMS Sent
+- source: NotificationService
+  pattern: Push notification dispatched
+  activity: Push Sent
+- source: CRM
+  pattern: Customer profile created
+  activity: Customer Profile Created
+- source: CRM
+  pattern: Updated contact info
+  activity: Contact Info Updated
+- source: CRM
+  pattern: CRM sync initiated
+  activity: CRM Sync
+default_activity: activity_raw
+activity_to_source:
+  Aadhaar/PAN KYC Check: KYCService
+  Application Accepted: APIGateway
+  Application Inserted: DBLogs
+  Application Submitted: APIGateway
+  Application Validated: LoanProcessor
+  Approval Sent: LoanProcessor
+  Credit Check (CIBIL): CreditCheck
+  Credit Score Updated: DBLogs
+  Customer Profile Created: CRM
+  Customer Profile Queried: DBLogs
+  Documents Scanned: DocVerifier
+  Documents Verified: DocVerifier
+  Fetch Credit Report: CreditCheck
+  KYC Completed: EventLogs
+  KYC Lookup Start: KYCService
+  KYC Mismatch (PAN): DocVerifier
+  KYC Verification Initiated: DBLogs
+  Loan Disbursed: EventLogs
+  Loan Status Updated: DBLogs
+  PAN Validation Failed: KYCService
+  Processing Fee Payment Confirmed: PaymentGateway
+  Processing Fee Payment Initiated: PaymentGateway
+  Property Verification Initiated: DBLogs
+  Property Verified: EventLogs
+  Push Sent: NotificationService
+  Risk Analysis & Eligibility: LoanProcessor
+  Sanction Letter Issued: EventLogs
+  Sanction Letter Updated: DBLogs
+  Score Below Threshold: CreditCheck
+  Temporary Documents Cleanup: DBLogs
+  Underwriter Decision Note: UnderwriterConsole
+  Underwriter Review: UnderwriterConsole
+  Underwriting Approved: EventLogs
+reverse_rules:
+- source: APIGateway
+  activity: Application Accepted
+  level: '[INFO]'
+  template: RESPONSE 200 OK for application ID {app_id}
+- source: APIGateway
+  activity: Application Submitted
+  level: '[INFO]'
+  template: REQUEST POST /loan-application/submit for application ID {app_id}
+- source: CRM
+  activity: Customer Profile Created
+  level: '[INFO]'
+  template: Customer profile created for application ID {app_id}
+- source: CreditCheck
+  activity: Credit Check (CIBIL)
+  level: '[INFO]'
+  template: CIBIL check initiated for application ID {app_id}
+- source: CreditCheck
+  activity: Fetch Credit Report
+  level: '[INFO]'
+  template: Credit report fetched for application ID {app_id}
+- source: CreditCheck
+  activity: Score Below Threshold
+  level: '[ERROR]'
+  template: Score below threshold for application ID {app_id}
+- source: DocVerifier
+  activity: Documents Scanned
+  level: '[DEBUG]'
+  template: Document scanned for application ID {app_id}
+- source: DocVerifier
+  activity: Documents Verified
+  level: '[INFO]'
+  template: Verification passed for application ID {app_id}
+- source: DocVerifier
+  activity: KYC Mismatch (PAN)
+  level: '[WARN]'
+  template: Mismatch found in PAN for application ID {app_id}
+- source: KYCService
+  activity: Aadhaar/PAN KYC Check
+  level: '[INFO]'
+  template: Aadhaar verified for application ID {app_id}
+- source: KYCService
+  activity: KYC Lookup Start
+  level: '[INFO]'
+  template: KYC lookup started for application ID {app_id}
+- source: LoanProcessor
+  activity: Application Validated
+  level: '[INFO]'
+  template: Loan application validated for application ID {app_id}
+- source: LoanProcessor
+  activity: Approval Sent
+  level: '[INFO]'
+  template: Loan approval sent for application ID {app_id}
+- source: LoanProcessor
+  activity: Risk Analysis & Eligibility
+  level: '[INFO]'
+  template: Loan risk analysis complete for application ID {app_id}
+- source: NotificationService
+  activity: Push Sent
+  level: '[INFO]'
+  template: Push notification dispatched for application ID {app_id}
+- source: PaymentGateway
+  activity: Processing Fee Payment Confirmed
+  level: '[DEBUG]'
+  template: SUCCESS Payment confirmed by bank for application ID {app_id}
+- source: PaymentGateway
+  activity: Processing Fee Payment Initiated
+  level: '[INFO]'
+  template: INFO Payment initiated for application ID {app_id}
+- source: UnderwriterConsole
+  activity: Underwriter Review
+  level: '[INFO]'
+  template: INFO Underwriter JohnD reviewed application ID {app_id}
+reverse_db_rules:
+- activity: Application Inserted
+  csv_row:
+    timestamp: '{dayfirst_ts}'
+    case_id: '{app_id}'
+    query: INSERT INTO loan_applications (application_id, created_at) VALUES ('{app_id}',
+      '{iso_ts}')
+- activity: Credit Score Updated
+  csv_row:
+    timestamp: '{dayfirst_ts}'
+    case_id: '{app_id}'
+    query: UPDATE credit_scores SET updated_at='{iso_ts}' WHERE application_id='{app_id}'
+- activity: Customer Profile Queried
+  csv_row:
+    timestamp: '{dayfirst_ts}'
+    case_id: '{app_id}'
+    query: SELECT * FROM customers WHERE application_id='{app_id}'
+- activity: KYC Verification Initiated
+  csv_row:
+    timestamp: '{dayfirst_ts}'
+    case_id: '{app_id}'
+    query: INSERT INTO kyc_verification (application_id, created_at) VALUES ('{app_id}',
+      '{iso_ts}')
+- activity: Loan Status Updated
+  csv_row:
+    timestamp: '{dayfirst_ts}'
+    case_id: '{app_id}'
+    query: UPDATE loan_status SET updated_at='{iso_ts}' WHERE application_id='{app_id}'
+- activity: Property Verification Initiated
+  csv_row:
+    timestamp: '{dayfirst_ts}'
+    case_id: '{app_id}'
+    query: INSERT INTO property_details (application_id, created_at) VALUES ('{app_id}',
+      '{iso_ts}')
+- activity: Sanction Letter Updated
+  csv_row:
+    timestamp: '{dayfirst_ts}'
+    case_id: '{app_id}'
+    query: UPDATE sanction_letters SET updated_at='{iso_ts}' WHERE application_id='{app_id}'
+- activity: Temporary Documents Cleanup
+  csv_row:
+    timestamp: '{dayfirst_ts}'
+    case_id: '{app_id}'
+    query: DELETE FROM temp_docs WHERE application_id='{app_id}'
+reverse_event_rules:
+  columns:
+  - case_id
+  - activity
+  - timestamp
+  - source
+  row_template:
+    case_id: '{app_id}'
+    activity: '{activity}'
+    timestamp: '{dayfirst_ts}'
+    source: EventLogs
+styles:
+  APIGateway:
+    timestamp_format: '%Y-%m-%d %H:%M:%S'
+    line_format: '{timestamp} {level} {message}'
+  CreditCheck:
+    timestamp_format: '%Y-%m-%d %H:%M:%S'
+    line_format: '{timestamp} {level} {message}'
+  DocVerifier:
+    timestamp_format: '%Y-%m-%d %H:%M:%S'
+    line_format: '{timestamp} {level} {message}'
+  KYCService:
+    timestamp_format: '%Y-%m-%d %H:%M:%S'
+    line_format: '{timestamp} {level} {message}'
+  NotificationService:
+    timestamp_format: '%Y-%m-%d %H:%M:%S'
+    line_format: '{timestamp} {level} {message}'
+  PaymentGateway:
+    timestamp_format: '%Y-%m-%d %H:%M:%S'
+    line_format: '{timestamp} {level} {message}'
+  UnderwriterConsole:
+    timestamp_format: '%Y-%m-%d %H:%M:%S'
+    line_format: '{timestamp} {level} {message}'
+  CRM:
+    timestamp_format: '%Y-%m-%d %H:%M:%S'
+    line_format: '{timestamp} {level} {message}'
+  LoanProcessor:
+    timestamp_format: '%Y-%m-%d %H:%M:%S'
+    line_format: '{timestamp} {level} {message}'

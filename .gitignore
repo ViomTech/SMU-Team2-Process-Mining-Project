@@ -1,0 +1,10 @@
+# Python
+__pycache__/
+*.pyc
+*.env
+**/get-pip.py
+.venv/
+venv/
+.DS_Store
+.pytest_cache/
+migrations/
