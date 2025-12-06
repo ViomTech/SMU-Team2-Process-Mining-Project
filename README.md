@@ -28,8 +28,6 @@ This Business Process Optimisation System (BPOS) is an intelligent process minin
 
 ---
 
----
-
 ## 🏗️ Architectural Design
 
 **System Context (Level 1)**
@@ -125,7 +123,6 @@ TripleThreatx2/
         ├── requirements.txt  # Python dependencies
         └── .env              # Backend environment variables
 ```
-
 ---
 
 ## 🚀 Local Development
@@ -229,6 +226,24 @@ MAIL_USE_SSL=false
 ```env
 VITE_API_URL=http://localhost:5000
 ```
+
+---
+
+## Project Sample Workflow and Set up
+Process Creation, Upload, Generation and Approval: 
+1. Admin and BPO both register their own accounts
+2. Admin logs into account
+3. Creates new process and assigns BPO to it
+4. Uploads Txt/CSV event log (with case_id, activity and timestamp) and Mines Process
+5. Backend will conduct normalisation and map raw messages into standardised activity labels
+6. PM4PY will discover process models and generate BPMN diagram 
+6. Admin submits request to BPO for approval
+
+7. BPO logs into account
+8. Clicks into process assigned by Admin
+9. Able to approve/reject Admin's change request with comment
+10. All approve / reject decisions are logged in a history tab
+
 
 **Production (.env.production):**
 ```env
